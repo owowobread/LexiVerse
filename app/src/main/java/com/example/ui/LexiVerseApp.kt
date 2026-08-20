@@ -5,11 +5,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
-import androidx.compose.material.icons.filled.MenuBook
+import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.Psychology
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.BookmarkBorder
-import androidx.compose.material.icons.outlined.MenuBook
+import androidx.compose.material.icons.automirrored.outlined.MenuBook
 import androidx.compose.material.icons.outlined.Psychology
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -34,11 +34,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.di.AppContainer
+import com.example.domain.model.FontFamilySetting
+import com.example.domain.model.FontScaleSetting
 import com.example.domain.model.ThemeSetting
 import com.example.ui.screens.BookmarksHistoryScreen
 import com.example.ui.screens.DictionarySearchScreen
@@ -58,8 +61,8 @@ enum class AppNavigationItem(
 ) {
     DICTIONARY(
         title = "Dictionary",
-        selectedIcon = Icons.Filled.MenuBook,
-        unselectedIcon = Icons.Outlined.MenuBook,
+        selectedIcon = Icons.AutoMirrored.Filled.MenuBook,
+        unselectedIcon = Icons.AutoMirrored.Outlined.MenuBook,
         testTag = "nav_item_dictionary"
     ),
     REVERSE_AI(
@@ -95,20 +98,17 @@ fun LexiVerseApp(
             appContainer.manageFavoritesUseCase
         )
     )
-
     val reverseAiViewModel: ReverseAiViewModel = viewModel(
         factory = ReverseAiViewModel.Factory(
             appContainer.reverseAiSearchUseCase,
             appContainer.preferences
         )
     )
-
     val favoritesViewModel: FavoritesViewModel = viewModel(
         factory = FavoritesViewModel.Factory(
             appContainer.manageFavoritesUseCase
         )
     )
-
     val settingsViewModel: SettingsViewModel = viewModel(
         factory = SettingsViewModel.Factory(
             appContainer.preferences,
@@ -119,13 +119,29 @@ fun LexiVerseApp(
     )
 
     val themeSetting by appContainer.preferences.themeSetting.collectAsState(initial = ThemeSetting.SYSTEM)
+    val fontFamilySetting by appContainer.preferences.fontFamilySetting.collectAsState(initial = FontFamilySetting.DEFAULT)
+    val fontScaleSetting by appContainer.preferences.fontScaleSetting.collectAsState(initial = FontScaleSetting.NORMAL)
+
+    val composeFontFamily = when(fontFamilySetting) {
+        FontFamilySetting.DEFAULT -> FontFamily.Default
+        FontFamilySetting.SERIF -> FontFamily.Serif
+        FontFamilySetting.MONOSPACE -> FontFamily.Monospace
+        FontFamilySetting.SANS_SERIF -> FontFamily.SansSerif
+        FontFamilySetting.CURSIVE -> FontFamily.Cursive
+    }
+    
+    val fontScale = fontScaleSetting.scale
 
     // Optional silent update check on launch
     LaunchedEffect(Unit) {
         settingsViewModel.checkForUpdate(showDialogIfAvailable = false)
     }
 
-    LexiVerseTheme(themeSetting = themeSetting) {
+    LexiVerseTheme(
+        themeSetting = themeSetting,
+        fontFamily = composeFontFamily,
+        fontScale = fontScale
+    ) {
         Surface(
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.background

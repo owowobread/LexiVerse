@@ -6,6 +6,8 @@ import androidx.lifecycle.viewModelScope
 import com.example.data.preferences.LexiVersePreferences
 import com.example.data.updater.DownloadState
 import com.example.domain.model.AppUpdateInfo
+import com.example.domain.model.FontFamilySetting
+import com.example.domain.model.FontScaleSetting
 import com.example.domain.model.Resource
 import com.example.domain.model.ThemeSetting
 import com.example.domain.usecase.CheckAppUpdateUseCase
@@ -28,6 +30,8 @@ data class SettingsUiState(
     val githubOwner: String = LexiVersePreferences.DEFAULT_GITHUB_OWNER,
     val githubRepo: String = LexiVersePreferences.DEFAULT_GITHUB_REPO,
     val themeSetting: ThemeSetting = ThemeSetting.SYSTEM,
+    val fontFamilySetting: FontFamilySetting = FontFamilySetting.DEFAULT,
+    val fontScaleSetting: FontScaleSetting = FontScaleSetting.NORMAL,
     val autoCheckUpdates: Boolean = true,
     val offlineWordCount: Int = 0,
     val isTestingApi: Boolean = false,
@@ -79,6 +83,16 @@ class SettingsViewModel(
             }
         }
         viewModelScope.launch {
+            preferences.fontFamilySetting.collectLatest { font ->
+                _uiState.update { it.copy(fontFamilySetting = font) }
+            }
+        }
+        viewModelScope.launch {
+            preferences.fontScaleSetting.collectLatest { scale ->
+                _uiState.update { it.copy(fontScaleSetting = scale) }
+            }
+        }
+        viewModelScope.launch {
             preferences.autoCheckUpdates.collectLatest { enabled ->
                 _uiState.update { it.copy(autoCheckUpdates = enabled) }
             }
@@ -113,6 +127,18 @@ class SettingsViewModel(
             preferences.setThemeSetting(theme)
         }
     }
+    
+    fun saveFontFamily(fontFamily: FontFamilySetting) {
+        viewModelScope.launch {
+            preferences.setFontFamilySetting(fontFamily)
+        }
+    }
+    
+    fun saveFontScale(fontScale: FontScaleSetting) {
+        viewModelScope.launch {
+            preferences.setFontScaleSetting(fontScale)
+        }
+    }
 
     fun saveAutoCheckUpdates(enabled: Boolean) {
         viewModelScope.launch {
@@ -123,6 +149,7 @@ class SettingsViewModel(
     fun testApiConnection() {
         val key = _uiState.value.apiKey
         val model = _uiState.value.model
+
         viewModelScope.launch {
             _uiState.update { it.copy(isTestingApi = true, testStatus = "Testing connection to OpenRouter...") }
             reverseAiSearchUseCase.testConnection(key, model).collectLatest { res ->
@@ -153,6 +180,7 @@ class SettingsViewModel(
                     updateErrorMessage = null
                 )
             }
+
             checkAppUpdateUseCase(owner, repo).collectLatest { res ->
                 when (res) {
                     is Resource.Loading -> {

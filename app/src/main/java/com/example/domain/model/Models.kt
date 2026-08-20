@@ -13,6 +13,21 @@ enum class ThemeSetting {
     AMOLED
 }
 
+enum class FontFamilySetting {
+    DEFAULT,
+    SERIF,
+    MONOSPACE,
+    SANS_SERIF,
+    CURSIVE
+}
+
+enum class FontScaleSetting(val scale: Float, val label: String) {
+    SMALL(0.85f, "Small"),
+    NORMAL(1.0f, "Normal"),
+    LARGE(1.15f, "Large"),
+    EXTRA_LARGE(1.3f, "Extra Large")
+}
+
 data class VocabDefinitionItem(
     val partOfSpeech: String,
     val definition: String,

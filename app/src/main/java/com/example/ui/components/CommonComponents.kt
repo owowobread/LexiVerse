@@ -48,10 +48,10 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.ui.theme.NaturalOfflineAmber
-import com.example.ui.theme.NaturalOfflineContainer
-import com.example.ui.theme.NaturalSyncedContainer
-import com.example.ui.theme.NaturalSyncedGreen
+import com.example.ui.theme.StatusOfflineAmber
+import com.example.ui.theme.StatusOfflineContainer
+import com.example.ui.theme.StatusSyncedContainer
+import com.example.ui.theme.StatusSyncedBlue
 import java.util.Locale
 
 class TtsManager(private val context: Context) {
@@ -96,8 +96,8 @@ fun OnlineStatusBadge(
     isOffline: Boolean,
     modifier: Modifier = Modifier
 ) {
-    val bgColor = if (isOffline) NaturalOfflineContainer else NaturalSyncedContainer
-    val contentColor = if (isOffline) NaturalOfflineAmber else NaturalSyncedGreen
+    val bgColor = if (isOffline) StatusOfflineContainer else StatusSyncedContainer
+    val contentColor = if (isOffline) StatusOfflineAmber else StatusSyncedBlue
     val icon = if (isOffline) Icons.Default.CloudOff else Icons.Default.CloudDone
     val text = if (isOffline) "Offline Result" else "Synced"
 

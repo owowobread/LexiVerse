@@ -10,78 +10,81 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontFamily
 import com.example.domain.model.ThemeSetting
 
 private val LightColorScheme = lightColorScheme(
-    primary = NaturalGreenPrimary,
+    primary = BluePurplePrimary,
     onPrimary = Color.White,
-    primaryContainer = NaturalSagePrimaryContainer,
-    onPrimaryContainer = NaturalOnPrimaryContainer,
-    secondary = NaturalOliveSecondary,
+    primaryContainer = BluePurplePrimaryContainer,
+    onPrimaryContainer = BluePurpleOnPrimaryContainer,
+    secondary = PurplishSecondary,
     onSecondary = Color.White,
-    secondaryContainer = NaturalSecondaryContainer,
-    onSecondaryContainer = NaturalOnSecondaryContainer,
-    tertiary = NaturalWarmOchreTertiary,
+    secondaryContainer = PurplishSecondaryContainer,
+    onSecondaryContainer = PurplishOnSecondaryContainer,
+    tertiary = IndigoTertiary,
     onTertiary = Color.White,
-    tertiaryContainer = NaturalTertiaryContainer,
-    onTertiaryContainer = NaturalOnTertiaryContainer,
-    background = NaturalLightBackground,
-    onBackground = NaturalLightOnBackground,
-    surface = NaturalLightSurface,
-    onSurface = NaturalLightOnSurface,
-    surfaceVariant = NaturalLightSurfaceVariant,
-    onSurfaceVariant = NaturalLightOnSurfaceVariant,
-    outline = NaturalLightOutline,
-    outlineVariant = NaturalLightOutlineVariant
+    tertiaryContainer = IndigoTertiaryContainer,
+    onTertiaryContainer = IndigoOnTertiaryContainer,
+    background = LightBackground,
+    onBackground = LightOnBackground,
+    surface = LightSurface,
+    onSurface = LightOnSurface,
+    surfaceVariant = LightSurfaceVariant,
+    onSurfaceVariant = LightOnSurfaceVariant,
+    outline = LightOutline,
+    outlineVariant = LightOutlineVariant
 )
 
 private val DarkColorScheme = darkColorScheme(
-    primary = NaturalGreenLight,
-    onPrimary = Color(0xFF0F2012),
-    primaryContainer = NaturalGreenDark,
-    onPrimaryContainer = NaturalSagePrimaryContainer,
-    secondary = NaturalOliveLight,
-    onSecondary = Color(0xFF132014),
-    secondaryContainer = Color(0xFF2E3D2F),
-    onSecondaryContainer = NaturalSecondaryContainer,
-    tertiary = NaturalWarmOchreGlow,
-    onTertiary = Color(0xFF332000),
-    tertiaryContainer = Color(0xFF573E14),
-    onTertiaryContainer = NaturalTertiaryContainer,
-    background = NaturalDarkBackground,
-    onBackground = NaturalDarkOnBackground,
-    surface = NaturalDarkSurface,
-    onSurface = NaturalDarkOnSurface,
-    surfaceVariant = NaturalDarkSurfaceVariant,
-    onSurfaceVariant = NaturalDarkOnSurfaceVariant,
-    outline = NaturalDarkOutline
+    primary = BluePurpleLight,
+    onPrimary = Color(0xFF0A0738),
+    primaryContainer = BluePurpleDark,
+    onPrimaryContainer = BluePurplePrimaryContainer,
+    secondary = PurplishSecondaryLight,
+    onSecondary = Color(0xFF230738),
+    secondaryContainer = Color(0xFF3F1366),
+    onSecondaryContainer = PurplishSecondaryContainer,
+    tertiary = IndigoTertiaryGlow,
+    onTertiary = Color(0xFF07194D),
+    tertiaryContainer = Color(0xFF1E3A8A),
+    onTertiaryContainer = IndigoTertiaryContainer,
+    background = DarkBackground,
+    onBackground = DarkOnBackground,
+    surface = DarkSurface,
+    onSurface = DarkOnSurface,
+    surfaceVariant = DarkSurfaceVariant,
+    onSurfaceVariant = DarkOnSurfaceVariant,
+    outline = DarkOutline
 )
 
 private val AmoledColorScheme = darkColorScheme(
-    primary = NaturalGreenLight,
+    primary = BluePurpleLight,
     onPrimary = Color.Black,
-    primaryContainer = Color(0xFF18301B),
-    onPrimaryContainer = NaturalSagePrimaryContainer,
-    secondary = NaturalOliveLight,
+    primaryContainer = Color(0xFF120D54),
+    onPrimaryContainer = BluePurplePrimaryContainer,
+    secondary = PurplishSecondaryLight,
     onSecondary = Color.Black,
-    secondaryContainer = Color(0xFF223023),
-    onSecondaryContainer = NaturalSecondaryContainer,
-    tertiary = NaturalWarmOchreGlow,
+    secondaryContainer = Color(0xFF2F0B4F),
+    onSecondaryContainer = PurplishSecondaryContainer,
+    tertiary = IndigoTertiaryGlow,
     onTertiary = Color.Black,
-    tertiaryContainer = Color(0xFF45300B),
-    onTertiaryContainer = NaturalTertiaryContainer,
-    background = NaturalAmoledBackground,
-    onBackground = NaturalAmoledOnBackground,
-    surface = NaturalAmoledSurface,
-    onSurface = NaturalAmoledOnSurface,
-    surfaceVariant = NaturalAmoledSurfaceVariant,
-    onSurfaceVariant = NaturalAmoledOnSurfaceVariant,
-    outline = NaturalAmoledOutline
+    tertiaryContainer = Color(0xFF102159),
+    onTertiaryContainer = IndigoTertiaryContainer,
+    background = AmoledBackground,
+    onBackground = AmoledOnBackground,
+    surface = AmoledSurface,
+    onSurface = AmoledOnSurface,
+    surfaceVariant = AmoledSurfaceVariant,
+    onSurfaceVariant = AmoledOnSurfaceVariant,
+    outline = AmoledOutline
 )
 
 @Composable
 fun LexiVerseTheme(
     themeSetting: ThemeSetting = ThemeSetting.SYSTEM,
+    fontFamily: FontFamily = FontFamily.Default,
+    fontScale: Float = 1.0f,
     dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
@@ -104,7 +107,7 @@ fun LexiVerseTheme(
 
     MaterialTheme(
         colorScheme = colorScheme,
-        typography = Typography,
+        typography = getCustomTypography(fontFamily, fontScale),
         content = content
     )
 }

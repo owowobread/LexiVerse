@@ -73,6 +73,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.BuildConfig
 import com.example.domain.model.ThemeSetting
+import com.example.domain.model.FontFamilySetting
+import com.example.domain.model.FontScaleSetting
 import com.example.ui.components.UpdateDialog
 import com.example.ui.viewmodel.SettingsViewModel
 
@@ -419,6 +421,80 @@ fun SettingsScreen(
                                 text = label,
                                 style = MaterialTheme.typography.bodyMedium,
                                 fontWeight = if (uiState.themeSetting == theme) FontWeight.Bold else FontWeight.Normal
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = "Font Type",
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                    
+                    val fonts = listOf(
+                        FontFamilySetting.DEFAULT to "Default Sans",
+                        FontFamilySetting.SERIF to "Elegant Serif",
+                        FontFamilySetting.MONOSPACE to "Monospace",
+                        FontFamilySetting.CURSIVE to "Cursive"
+                    )
+                    
+                    fonts.forEach { (font, label) ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { viewModel.saveFontFamily(font) }
+                                .padding(vertical = 6.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            RadioButton(
+                                selected = uiState.fontFamilySetting == font,
+                                onClick = { viewModel.saveFontFamily(font) }
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = label,
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = if (uiState.fontFamilySetting == font) FontWeight.Bold else FontWeight.Normal
+                            )
+                        }
+                    }
+                    
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = "Font Size",
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                    
+                    val fontScales = listOf(
+                        FontScaleSetting.SMALL to "Small",
+                        FontScaleSetting.NORMAL to "Normal",
+                        FontScaleSetting.LARGE to "Large",
+                        FontScaleSetting.EXTRA_LARGE to "Extra Large"
+                    )
+                    
+                    fontScales.forEach { (scale, label) ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { viewModel.saveFontScale(scale) }
+                                .padding(vertical = 6.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            RadioButton(
+                                selected = uiState.fontScaleSetting == scale,
+                                onClick = { viewModel.saveFontScale(scale) }
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = label,
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = if (uiState.fontScaleSetting == scale) FontWeight.Bold else FontWeight.Normal
                             )
                         }
                     }
