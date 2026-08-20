@@ -17,7 +17,7 @@ class UpdateRepository(
     private val apkDownloaderAndInstaller: ApkDownloaderAndInstaller
 ) {
 
-    fun checkForUpdate(owner: String, repo: String): Flow<Resource<AppUpdateInfo>> = flow {
+    fun checkForUpdate(owner: String, repo: String, token: String? = null): Flow<Resource<AppUpdateInfo>> = flow {
         emit(Resource.Loading)
         val cleanOwner = owner.trim()
         val cleanRepo = repo.trim()
@@ -28,12 +28,18 @@ class UpdateRepository(
         }
 
         try {
-            val response = gitHubApi.getLatestRelease(cleanOwner, cleanRepo)
+            val authHeader = if (!token.isNullOrBlank()) "Bearer ${token.trim()}" else null
+            val response = gitHubApi.getLatestRelease(cleanOwner, cleanRepo, authHeader)
             if (!response.isSuccessful) {
                 if (response.code() == 404) {
+                    val msg = if (token.isNullOrBlank()) {
+                        "No releases found or repository is private. Please provide a GitHub Token in Settings."
+                    } else {
+                        "No releases found. Did you publish a GitHub Release with an APK? (Check that the repo and token are correct)."
+                    }
                     emit(
                         Resource.Error(
-                            "No releases found for GitHub repo $cleanOwner/$cleanRepo. Please verify repository owner and name in Settings."
+                            msg
                         )
                     )
                 } else {

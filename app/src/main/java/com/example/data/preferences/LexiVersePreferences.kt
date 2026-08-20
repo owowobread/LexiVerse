@@ -23,6 +23,7 @@ class LexiVersePreferences(private val context: Context) {
         private val KEY_OPENROUTER_BASE_URL = stringPreferencesKey("openrouter_base_url")
         private val KEY_GITHUB_OWNER = stringPreferencesKey("github_owner")
         private val KEY_GITHUB_REPO = stringPreferencesKey("github_repo")
+        private val KEY_GITHUB_TOKEN = stringPreferencesKey("github_token")
         private val KEY_THEME_MODE = stringPreferencesKey("theme_mode")
         private val KEY_AUTO_CHECK_UPDATES = booleanPreferencesKey("auto_check_updates")
         private val KEY_FONT_FAMILY = stringPreferencesKey("font_family")
@@ -57,6 +58,10 @@ class LexiVersePreferences(private val context: Context) {
 
     val githubRepo: Flow<String> = context.dataStore.data.map { prefs ->
         prefs[KEY_GITHUB_REPO] ?: DEFAULT_GITHUB_REPO
+    }
+
+    val githubToken: Flow<String> = context.dataStore.data.map { prefs ->
+        prefs[KEY_GITHUB_TOKEN] ?: ""
     }
 
     val themeSetting: Flow<ThemeSetting> = context.dataStore.data.map { prefs ->
@@ -115,7 +120,11 @@ class LexiVersePreferences(private val context: Context) {
         }
     }
 
-    suspend fun setGitHubRepo(owner: String, repo: String) {
+    suspend fun setGitHubRepo(owner: String, repo: String, token: String) {
+        context.dataStore.edit { prefs ->
+            prefs[KEY_GITHUB_TOKEN] = token.trim()
+        }
+
         context.dataStore.edit { prefs ->
             prefs[KEY_GITHUB_OWNER] = owner.trim()
             prefs[KEY_GITHUB_REPO] = repo.trim()

@@ -92,6 +92,7 @@ fun SettingsScreen(
 
     var editingOwner by remember(uiState.githubOwner) { mutableStateOf(uiState.githubOwner) }
     var editingRepo by remember(uiState.githubRepo) { mutableStateOf(uiState.githubRepo) }
+    var editingToken by remember(uiState.githubToken) { mutableStateOf(uiState.githubToken) }
     var editingKey by remember(uiState.apiKey) { mutableStateOf(uiState.apiKey) }
     var editingModel by remember(uiState.model) { mutableStateOf(uiState.model) }
     var editingApiName by remember(uiState.apiName) { mutableStateOf(uiState.apiName) }
@@ -387,7 +388,7 @@ fun SettingsScreen(
                             value = editingOwner,
                             onValueChange = {
                                 editingOwner = it
-                                viewModel.saveGitHubRepo(it, editingRepo)
+                                viewModel.saveGitHubRepo(it, editingRepo, editingToken)
                             },
                             label = { Text("GitHub Owner") },
                             singleLine = true,
@@ -399,7 +400,7 @@ fun SettingsScreen(
                             value = editingRepo,
                             onValueChange = {
                                 editingRepo = it
-                                viewModel.saveGitHubRepo(editingOwner, it)
+                                viewModel.saveGitHubRepo(editingOwner, it, editingToken)
                             },
                             label = { Text("Repo Name") },
                             singleLine = true,
@@ -407,6 +408,18 @@ fun SettingsScreen(
                             modifier = Modifier.weight(1f)
                         )
                     }
+                    Spacer(modifier = Modifier.height(10.dp))
+                    OutlinedTextField(
+                        value = editingToken,
+                        onValueChange = {
+                            editingToken = it
+                            viewModel.saveGitHubRepo(editingOwner, editingRepo, it)
+                        },
+                        label = { Text("GitHub Token (Required for Private Repos)") },
+                        singleLine = true,
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    )
 
                     Spacer(modifier = Modifier.height(12.dp))
 
@@ -428,6 +441,18 @@ fun SettingsScreen(
                             }
                         )
                     }
+                    Spacer(modifier = Modifier.height(10.dp))
+                    OutlinedTextField(
+                        value = editingToken,
+                        onValueChange = {
+                            editingToken = it
+                            viewModel.saveGitHubRepo(editingOwner, editingRepo, it)
+                        },
+                        label = { Text("GitHub Token (Required for Private Repos)") },
+                        singleLine = true,
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    )
 
                     Spacer(modifier = Modifier.height(12.dp))
 

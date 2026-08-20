@@ -44,8 +44,8 @@ class ReverseAiSearchUseCase(private val aiRepository: AiRepository) {
 }
 
 class CheckAppUpdateUseCase(private val updateRepository: UpdateRepository) {
-    operator fun invoke(owner: String, repo: String): Flow<Resource<AppUpdateInfo>> =
-        updateRepository.checkForUpdate(owner, repo)
+    operator fun invoke(owner: String, repo: String, token: String? = null): Flow<Resource<AppUpdateInfo>> =
+        updateRepository.checkForUpdate(owner, repo, token)
 
     fun downloadApk(url: String) =
         updateRepository.downloadApk(url)

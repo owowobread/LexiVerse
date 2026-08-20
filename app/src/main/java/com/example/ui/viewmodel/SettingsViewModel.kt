@@ -31,6 +31,7 @@ data class SettingsUiState(
     val model: String = LexiVersePreferences.DEFAULT_MODEL,
     val githubOwner: String = LexiVersePreferences.DEFAULT_GITHUB_OWNER,
     val githubRepo: String = LexiVersePreferences.DEFAULT_GITHUB_REPO,
+    val githubToken: String = "",
     val themeSetting: ThemeSetting = ThemeSetting.SYSTEM,
     val fontFamilySetting: FontFamilySetting = FontFamilySetting.DEFAULT,
     val fontScaleSetting: FontScaleSetting = FontScaleSetting.NORMAL,
@@ -90,6 +91,11 @@ class SettingsViewModel(
             }
         }
         viewModelScope.launch {
+            preferences.githubToken.collectLatest { token ->
+                _uiState.update { it.copy(githubToken = token) }
+            }
+        }
+        viewModelScope.launch {
             preferences.themeSetting.collectLatest { theme ->
                 _uiState.update { it.copy(themeSetting = theme) }
             }
@@ -140,9 +146,9 @@ class SettingsViewModel(
         }
     }
 
-    fun saveGitHubRepo(owner: String, repo: String) {
+    fun saveGitHubRepo(owner: String, repo: String, token: String) {
         viewModelScope.launch {
-            preferences.setGitHubRepo(owner, repo)
+            preferences.setGitHubRepo(owner, repo, token)
         }
     }
 
@@ -205,7 +211,7 @@ class SettingsViewModel(
                 )
             }
 
-            checkAppUpdateUseCase(owner, repo).collectLatest { res ->
+            checkAppUpdateUseCase(owner, repo, _uiState.value.githubToken).collectLatest { res ->
                 when (res) {
                     is Resource.Loading -> {
                         _uiState.update { it.copy(isCheckingUpdate = true) }

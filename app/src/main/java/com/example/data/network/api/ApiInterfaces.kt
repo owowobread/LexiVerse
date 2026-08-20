@@ -35,6 +35,7 @@ interface GitHubApi {
     @GET("repos/{owner}/{repo}/releases/latest")
     suspend fun getLatestRelease(
         @Path("owner") owner: String,
-        @Path("repo") repo: String
+        @Path("repo") repo: String,
+        @Header("Authorization") authorization: String? = null
     ): Response<GitHubReleaseDto>
 }
