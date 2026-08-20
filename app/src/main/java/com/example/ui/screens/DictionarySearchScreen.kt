@@ -20,6 +20,11 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
@@ -243,139 +248,182 @@ fun ActiveWordResultView(
         ?: result.urbanDefinitions.firstOrNull()?.definition
         ?: "No definition"
 
-    LazyColumn(
+    val pagerState = rememberPagerState(pageCount = { 3 })
+    val coroutineScope = rememberCoroutineScope()
+    
+    // Sync external tab selection with pager
+    LaunchedEffect(selectedTab) {
+        val targetPage = when(selectedTab) {
+            DictionarySourceTab.VOCABULARY -> 0
+            DictionarySourceTab.URBAN -> 1
+            DictionarySourceTab.OFFLINE -> 2
+        }
+        if (pagerState.currentPage != targetPage) {
+            pagerState.animateScrollToPage(targetPage)
+        }
+    }
+    
+    // Sync pager swipe with external tab selection
+    LaunchedEffect(pagerState.currentPage) {
+        val newTab = when(pagerState.currentPage) {
+            0 -> DictionarySourceTab.VOCABULARY
+            1 -> DictionarySourceTab.URBAN
+            else -> DictionarySourceTab.OFFLINE
+        }
+        if (selectedTab != newTab) {
+            onSelectTab(newTab)
+        }
+    }
+
+    Column(
         modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.spacedBy(14.dp),
-        contentPadding = PaddingValues(bottom = 24.dp)
+        verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
-        item {
-            // Header card with Word Title, Phonetic, Status Badge, and Action Icons
-            ElevatedCard(
-                shape = RoundedCornerShape(28.dp),
-                colors = CardDefaults.elevatedCardColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                ),
-                elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Column(modifier = Modifier.padding(20.dp)) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        OnlineStatusBadge(isOffline = result.isOfflineFallback)
-                        
-                        WordActionRow(
-                            word = result.queryWord,
-                            definition = primaryDefinition,
-                            isFavorite = isFavorite,
-                            onToggleFavorite = onToggleFavorite,
-                            ttsManager = ttsManager
-                        )
-                    }
+        // Header card with Word Title, Phonetic, Status Badge, and Action Icons
+        ElevatedCard(
+            shape = RoundedCornerShape(28.dp),
+            colors = CardDefaults.elevatedCardColors(
+                containerColor = MaterialTheme.colorScheme.surface
+            ),
+            elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Column(modifier = Modifier.padding(20.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    OnlineStatusBadge(isOffline = result.isOfflineFallback)
+                    
+                    WordActionRow(
+                        word = result.queryWord,
+                        definition = primaryDefinition,
+                        isFavorite = isFavorite,
+                        onToggleFavorite = onToggleFavorite,
+                        ttsManager = ttsManager
+                    )
+                }
 
-                    Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(12.dp))
 
+                Text(
+                    text = result.queryWord,
+                    style = MaterialTheme.typography.displayMedium,
+                    fontFamily = FontFamily.Serif,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+
+                val phonetic = result.offlineDefinition?.phonetic
+                if (!phonetic.isNullOrBlank()) {
+                    Spacer(modifier = Modifier.height(2.dp))
                     Text(
-                        text = result.queryWord,
-                        style = MaterialTheme.typography.displayMedium,
-                        fontFamily = FontFamily.Serif,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface
+                        text = phonetic,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Medium,
+                        color = MaterialTheme.colorScheme.primary
                     )
-
-                    val phonetic = result.offlineDefinition?.phonetic
-                    if (!phonetic.isNullOrBlank()) {
-                        Spacer(modifier = Modifier.height(2.dp))
-                        Text(
-                            text = phonetic,
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Medium,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                    }
                 }
             }
         }
 
-        item {
-            // Source Selector Tabs styled as Natural Tones pill chips
-            LazyRow(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+        // Source Selector Tabs styled as Natural Tones pill chips
+        LazyRow(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            item {
+                NaturalPillTab(
+                    title = "Vocabulary",
+                    isSelected = selectedTab == DictionarySourceTab.VOCABULARY,
+                    onClick = { 
+                        onSelectTab(DictionarySourceTab.VOCABULARY)
+                        coroutineScope.launch { pagerState.animateScrollToPage(0) }
+                    }
+                )
+            }
+            item {
+                val countStr = if (result.urbanDefinitions.isNotEmpty()) " (${result.urbanDefinitions.size})" else ""
+                NaturalPillTab(
+                    title = "Urban$countStr",
+                    isSelected = selectedTab == DictionarySourceTab.URBAN,
+                    onClick = { 
+                        onSelectTab(DictionarySourceTab.URBAN)
+                        coroutineScope.launch { pagerState.animateScrollToPage(1) }
+                    }
+                )
+            }
+            item {
+                NaturalPillTab(
+                    title = "Offline",
+                    isSelected = selectedTab == DictionarySourceTab.OFFLINE,
+                    onClick = { 
+                        onSelectTab(DictionarySourceTab.OFFLINE)
+                        coroutineScope.launch { pagerState.animateScrollToPage(2) }
+                    }
+                )
+            }
+        }
+
+        // Tab Content via HorizontalPager
+        HorizontalPager(
+            state = pagerState,
+            modifier = Modifier.fillMaxWidth().weight(1f),
+            verticalAlignment = Alignment.Top
+        ) { page ->
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(bottom = 24.dp),
+                verticalArrangement = Arrangement.spacedBy(14.dp)
             ) {
-                item {
-                    NaturalPillTab(
-                        title = "Vocabulary",
-                        isSelected = selectedTab == DictionarySourceTab.VOCABULARY,
-                        onClick = { onSelectTab(DictionarySourceTab.VOCABULARY) }
-                    )
-                }
-                item {
-                    val countStr = if (result.urbanDefinitions.isNotEmpty()) " (${result.urbanDefinitions.size})" else ""
-                    NaturalPillTab(
-                        title = "Urban$countStr",
-                        isSelected = selectedTab == DictionarySourceTab.URBAN,
-                        onClick = { onSelectTab(DictionarySourceTab.URBAN) }
-                    )
-                }
-                item {
-                    NaturalPillTab(
-                        title = "Offline",
-                        isSelected = selectedTab == DictionarySourceTab.OFFLINE,
-                        onClick = { onSelectTab(DictionarySourceTab.OFFLINE) }
-                    )
-                }
-            }
-        }
-
-        // Tab Content
-        when (selectedTab) {
-            DictionarySourceTab.VOCABULARY -> {
-                if (result.vocabularyResult != null) {
-                    item {
-                        VocabularyTabContent(vocab = result.vocabularyResult)
-                    }
-                } else {
-                    item {
-                        EmptySourceNotice(
-                            sourceName = "Vocabulary.com",
-                            message = "No online Vocabulary.com entry was found for '${result.queryWord}'. Displaying local dictionary below."
-                        )
-                    }
-                    if (result.offlineDefinition != null) {
-                        item {
-                            OfflineTabContent(offline = result.offlineDefinition)
+                when (page) {
+                    0 -> {
+                        if (result.vocabularyResult != null) {
+                            item {
+                                VocabularyTabContent(vocab = result.vocabularyResult)
+                            }
+                        } else {
+                            item {
+                                EmptySourceNotice(
+                                    sourceName = "Vocabulary.com",
+                                    message = "No online Vocabulary.com entry was found for '${result.queryWord}'. Displaying local dictionary below."
+                                )
+                            }
+                            if (result.offlineDefinition != null) {
+                                item {
+                                    OfflineTabContent(offline = result.offlineDefinition)
+                                }
+                            }
                         }
                     }
-                }
-            }
-            DictionarySourceTab.URBAN -> {
-                if (result.urbanDefinitions.isNotEmpty()) {
-                    items(result.urbanDefinitions) { urbanItem ->
-                        UrbanItemCard(item = urbanItem)
+                    1 -> {
+                        if (result.urbanDefinitions.isNotEmpty()) {
+                            items(result.urbanDefinitions) { urbanItem ->
+                                UrbanItemCard(item = urbanItem)
+                            }
+                        } else {
+                            item {
+                                EmptySourceNotice(
+                                    sourceName = "Urban Dictionary",
+                                    message = "No slang or urban definitions found for '${result.queryWord}'."
+                                )
+                            }
+                        }
                     }
-                } else {
-                    item {
-                        EmptySourceNotice(
-                            sourceName = "Urban Dictionary",
-                            message = "No slang or urban definitions found for '${result.queryWord}'."
-                        )
-                    }
-                }
-            }
-            DictionarySourceTab.OFFLINE -> {
-                if (result.offlineDefinition != null) {
-                    item {
-                        OfflineTabContent(offline = result.offlineDefinition)
-                    }
-                } else {
-                    item {
-                        EmptySourceNotice(
-                            sourceName = "Offline Dictionary",
-                            message = "'${result.queryWord}' is not yet in the offline database cache."
-                        )
+                    2 -> {
+                        if (result.offlineDefinition != null) {
+                            item {
+                                OfflineTabContent(offline = result.offlineDefinition)
+                            }
+                        } else {
+                            item {
+                                EmptySourceNotice(
+                                    sourceName = "Offline Dictionary",
+                                    message = "'${result.queryWord}' is not yet in the offline database cache."
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -601,54 +649,13 @@ fun UrbanItemCard(item: UrbanDefinitionItem) {
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Author and Upvotes/Downvotes
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "by ${item.author}",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-
-                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.ThumbUp,
-                            contentDescription = "Upvotes",
-                            tint = Color(0xFF10B981),
-                            modifier = Modifier.size(14.dp)
-                        )
-                        Text(
-                            text = "${item.thumbsUp}",
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                    }
-
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.ThumbDown,
-                            contentDescription = "Downvotes",
-                            tint = Color(0xFFEF4444),
-                            modifier = Modifier.size(14.dp)
-                        )
-                        Text(
-                            text = "${item.thumbsDown}",
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                    }
-                }
-            }
+            // Author
+            Text(
+                text = "by ${item.author}",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.align(Alignment.End)
+            )
         }
     }
 }
