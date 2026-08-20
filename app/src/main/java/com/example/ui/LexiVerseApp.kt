@@ -26,6 +26,9 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import com.example.ui.components.UpdateDialog
+import java.io.File
+import com.example.data.updater.DownloadState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -118,6 +121,7 @@ fun LexiVerseApp(
         )
     )
 
+    val settingsUiState by settingsViewModel.uiState.collectAsState()
     val themeSetting by appContainer.preferences.themeSetting.collectAsState(initial = ThemeSetting.SYSTEM)
     val fontFamilySetting by appContainer.preferences.fontFamilySetting.collectAsState(initial = FontFamilySetting.DEFAULT)
     val fontScaleSetting by appContainer.preferences.fontScaleSetting.collectAsState(initial = FontScaleSetting.NORMAL)
@@ -133,8 +137,10 @@ fun LexiVerseApp(
     val fontScale = fontScaleSetting.scale
 
     // Optional silent update check on launch
-    LaunchedEffect(Unit) {
-        settingsViewModel.checkForUpdate(showDialogIfAvailable = false)
+    LaunchedEffect(settingsUiState.autoCheckUpdates) {
+        if (settingsUiState.autoCheckUpdates) {
+            settingsViewModel.checkForUpdate(showDialogIfAvailable = true)
+        }
     }
 
     LexiVerseTheme(
@@ -240,6 +246,16 @@ fun LexiVerseApp(
                         }
                     }
                 }
+            }
+
+            if (settingsUiState.showUpdateDialog && settingsUiState.updateInfo != null) {
+                UpdateDialog(
+                    updateInfo = settingsUiState.updateInfo!!,
+                    downloadState = settingsUiState.downloadState,
+                    onStartDownload = { url -> settingsViewModel.startDownload(url) },
+                    onInstallApk = { file -> settingsViewModel.installApk(file) },
+                    onDismiss = { settingsViewModel.dismissUpdateDialog() }
+                )
             }
         }
     }

@@ -76,8 +76,13 @@ class AiRepository(
                 max_tokens = 1200
             )
 
+            val baseUrl = preferences.openRouterBaseUrl.first()
+            val url = if (baseUrl.endsWith("/")) "${baseUrl}chat/completions" else "$baseUrl/chat/completions"
+            val apiName = preferences.openRouterApiName.first()
             val response = openRouterApi.getChatCompletions(
+                url = url,
                 authorization = "Bearer $apiKey",
+                title = apiName.ifBlank { "LexiVerse Android" },
                 request = request
             )
 
@@ -142,8 +147,13 @@ class AiRepository(
                 ),
                 max_tokens = 30
             )
+            val baseUrl = preferences.openRouterBaseUrl.first()
+            val url = if (baseUrl.endsWith("/")) "${baseUrl}chat/completions" else "$baseUrl/chat/completions"
+            val apiName = preferences.openRouterApiName.first()
             val response = openRouterApi.getChatCompletions(
+                url = url,
                 authorization = "Bearer $apiKey",
+                title = apiName.ifBlank { "LexiVerse Android" },
                 request = request
             )
             if (response.isSuccessful) {

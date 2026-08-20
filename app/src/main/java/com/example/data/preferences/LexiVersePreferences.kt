@@ -19,6 +19,8 @@ class LexiVersePreferences(private val context: Context) {
     companion object {
         private val KEY_OPENROUTER_API_KEY = stringPreferencesKey("openrouter_api_key")
         private val KEY_OPENROUTER_MODEL = stringPreferencesKey("openrouter_model")
+        private val KEY_OPENROUTER_API_NAME = stringPreferencesKey("openrouter_api_name")
+        private val KEY_OPENROUTER_BASE_URL = stringPreferencesKey("openrouter_base_url")
         private val KEY_GITHUB_OWNER = stringPreferencesKey("github_owner")
         private val KEY_GITHUB_REPO = stringPreferencesKey("github_repo")
         private val KEY_THEME_MODE = stringPreferencesKey("theme_mode")
@@ -27,6 +29,8 @@ class LexiVersePreferences(private val context: Context) {
         private val KEY_FONT_SCALE = stringPreferencesKey("font_scale")
 
         const val DEFAULT_MODEL = "google/gemma-4-26b-a4b-it:free"
+        const val DEFAULT_API_NAME = "routersai"
+        const val DEFAULT_BASE_URL = "https://openrouter.ai/api/v1" 
         const val DEFAULT_GITHUB_OWNER = "maddyisthegame"
         const val DEFAULT_GITHUB_REPO = "LexiVerse"
     }
@@ -37,6 +41,14 @@ class LexiVersePreferences(private val context: Context) {
 
     val openRouterModel: Flow<String> = context.dataStore.data.map { prefs ->
         prefs[KEY_OPENROUTER_MODEL] ?: DEFAULT_MODEL
+    }
+
+    val openRouterApiName: Flow<String> = context.dataStore.data.map { prefs ->
+        prefs[KEY_OPENROUTER_API_NAME] ?: DEFAULT_API_NAME
+    }
+
+    val openRouterBaseUrl: Flow<String> = context.dataStore.data.map { prefs ->
+        prefs[KEY_OPENROUTER_BASE_URL] ?: DEFAULT_BASE_URL
     }
 
     val githubOwner: Flow<String> = context.dataStore.data.map { prefs ->
@@ -88,6 +100,18 @@ class LexiVersePreferences(private val context: Context) {
     suspend fun setOpenRouterModel(model: String) {
         context.dataStore.edit { prefs ->
             prefs[KEY_OPENROUTER_MODEL] = model.trim()
+        }
+    }
+
+    suspend fun setOpenRouterApiName(name: String) {
+        context.dataStore.edit { prefs ->
+            prefs[KEY_OPENROUTER_API_NAME] = name.trim()
+        }
+    }
+
+    suspend fun setOpenRouterBaseUrl(url: String) {
+        context.dataStore.edit { prefs ->
+            prefs[KEY_OPENROUTER_BASE_URL] = url.trim()
         }
     }
 

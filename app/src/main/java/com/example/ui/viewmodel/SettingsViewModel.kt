@@ -25,6 +25,8 @@ import kotlinx.coroutines.launch
 import java.io.File
 
 data class SettingsUiState(
+    val apiName: String = LexiVersePreferences.DEFAULT_API_NAME,
+    val apiBaseUrl: String = LexiVersePreferences.DEFAULT_BASE_URL,
     val apiKey: String = "",
     val model: String = LexiVersePreferences.DEFAULT_MODEL,
     val githubOwner: String = LexiVersePreferences.DEFAULT_GITHUB_OWNER,
@@ -60,6 +62,16 @@ class SettingsViewModel(
         viewModelScope.launch {
             preferences.openRouterApiKey.collectLatest { key ->
                 _uiState.update { it.copy(apiKey = key) }
+            }
+        }
+        viewModelScope.launch {
+            preferences.openRouterApiName.collectLatest { name ->
+                _uiState.update { it.copy(apiName = name) }
+            }
+        }
+        viewModelScope.launch {
+            preferences.openRouterBaseUrl.collectLatest { url ->
+                _uiState.update { it.copy(apiBaseUrl = url) }
             }
         }
         viewModelScope.launch {
@@ -107,6 +119,18 @@ class SettingsViewModel(
     fun saveApiKey(key: String) {
         viewModelScope.launch {
             preferences.setOpenRouterApiKey(key)
+        }
+    }
+
+    fun saveApiName(name: String) {
+        viewModelScope.launch {
+            preferences.setOpenRouterApiName(name)
+        }
+    }
+
+    fun saveApiBaseUrl(url: String) {
+        viewModelScope.launch {
+            preferences.setOpenRouterBaseUrl(url)
         }
     }
 

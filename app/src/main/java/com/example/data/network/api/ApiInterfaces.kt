@@ -11,6 +11,7 @@ import retrofit2.http.Header
 import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.Query
+import retrofit2.http.Url
 
 interface UrbanDictionaryApi {
     @GET("v0/define")
@@ -20,8 +21,9 @@ interface UrbanDictionaryApi {
 }
 
 interface OpenRouterApi {
-    @POST("api/v1/chat/completions")
+    @POST
     suspend fun getChatCompletions(
+        @Url url: String,
         @Header("Authorization") authorization: String,
         @Header("HTTP-Referer") referer: String = "https://github.com/maddyisthegame/LexiVerse",
         @Header("X-Title") title: String = "LexiVerse Android",

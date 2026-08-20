@@ -28,6 +28,8 @@ import androidx.compose.material.icons.filled.DeleteSweep
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Key
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.NetworkCheck
@@ -92,6 +94,8 @@ fun SettingsScreen(
     var editingRepo by remember(uiState.githubRepo) { mutableStateOf(uiState.githubRepo) }
     var editingKey by remember(uiState.apiKey) { mutableStateOf(uiState.apiKey) }
     var editingModel by remember(uiState.model) { mutableStateOf(uiState.model) }
+    var editingApiName by remember(uiState.apiName) { mutableStateOf(uiState.apiName) }
+    var editingApiBaseUrl by remember(uiState.apiBaseUrl) { mutableStateOf(uiState.apiBaseUrl) }
 
     LazyColumn(
         modifier = modifier
@@ -145,6 +149,38 @@ fun SettingsScreen(
 
                     Spacer(modifier = Modifier.height(14.dp))
 
+                    // API Name Field
+                    OutlinedTextField(
+                        value = editingApiName,
+                        onValueChange = {
+                            editingApiName = it
+                            viewModel.saveApiName(it)
+                        },
+                        label = { Text("Name") },
+                        placeholder = { Text("routersai") },
+                        singleLine = true,
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    // API Base URL Field
+                    OutlinedTextField(
+                        value = editingApiBaseUrl,
+                        onValueChange = {
+                            editingApiBaseUrl = it
+                            viewModel.saveApiBaseUrl(it)
+                        },
+                        label = { Text("API Base URL") },
+                        placeholder = { Text("https://openrouter.ai/api/v1") },
+                        singleLine = true,
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
                     // API Key Field
                     OutlinedTextField(
                         value = editingKey,
@@ -152,7 +188,7 @@ fun SettingsScreen(
                             editingKey = it
                             viewModel.saveApiKey(it)
                         },
-                        label = { Text("OpenRouter API Key") },
+                        label = { Text("API Key") },
                         placeholder = { Text("sk-or-v1-...") },
                         visualTransformation = if (isApiKeyVisible) VisualTransformation.None else PasswordVisualTransformation(),
                         trailingIcon = {
@@ -170,23 +206,83 @@ fun SettingsScreen(
                             .testTag("openrouter_api_key_field")
                     )
 
-                    Spacer(modifier = Modifier.height(10.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
+                    
+                    val context = LocalContext.current
+                    Text(
+                        text = "Open the API Key generation and management page",
+                        style = MaterialTheme.typography.bodySmall.copy(textDecoration = androidx.compose.ui.text.style.TextDecoration.Underline),
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("https://openrouter.ai/keys"))
+                                context.startActivity(intent)
+                            }
+                            .padding(vertical = 4.dp)
+                    )
 
-                    // Model Selection Field
+                    Spacer(modifier = Modifier.height(16.dp))
+                    
+                    Text(
+                        text = "Model ID",
+                        style = MaterialTheme.typography.titleSmall,
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.Bold
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    // Model Selection Field (Add Model)
                     OutlinedTextField(
                         value = editingModel,
                         onValueChange = {
                             editingModel = it
                             viewModel.saveModel(it)
                         },
-                        label = { Text("AI Model") },
-                        placeholder = { Text("google/gemma-4-26b-a4b-it:free") },
+                        label = { Text("Model ID") },
+                        placeholder = { Text("openrouter/free") },
                         singleLine = true,
                         shape = RoundedCornerShape(12.dp),
                         modifier = Modifier
                             .fillMaxWidth()
-                            .testTag("openrouter_model_field")
+                            .testTag("openrouter_model_field"),
+                        trailingIcon = {
+                            IconButton(onClick = { /* Could add to a list, but for now we just use the text field */ }) {
+                                Icon(
+                                    imageVector = Icons.Default.Add,
+                                    contentDescription = "Add Model"
+                                )
+                            }
+                        }
                     )
+                    
+                    if (uiState.model.isNotBlank()) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = uiState.model,
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                            IconButton(
+                                onClick = {
+                                    editingModel = ""
+                                    viewModel.saveModel("")
+                                },
+                                modifier = Modifier.size(24.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Close,
+                                    contentDescription = "Clear Model",
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                    }
 
                     Spacer(modifier = Modifier.height(12.dp))
 
@@ -309,6 +405,27 @@ fun SettingsScreen(
                             singleLine = true,
                             shape = RoundedCornerShape(12.dp),
                             modifier = Modifier.weight(1f)
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    // Auto-check toggle
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Check automatically on startup",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Switch(
+                            checked = uiState.autoCheckUpdates,
+                            onCheckedChange = { isChecked ->
+                                viewModel.saveAutoCheckUpdates(isChecked)
+                            }
                         )
                     }
 
@@ -621,13 +738,5 @@ fun SettingsScreen(
     }
 
     // Auto-update dialog
-    if (uiState.showUpdateDialog && uiState.updateInfo != null) {
-        UpdateDialog(
-            updateInfo = uiState.updateInfo!!,
-            downloadState = uiState.downloadState,
-            onStartDownload = { url -> viewModel.startDownload(url) },
-            onInstallApk = { file -> viewModel.installApk(file) },
-            onDismiss = { viewModel.dismissUpdateDialog() }
-        )
-    }
+
 }
