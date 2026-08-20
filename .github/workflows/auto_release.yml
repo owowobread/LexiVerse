@@ -42,9 +42,11 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
-      - name: Make gradlew executable
+      - name: Fix Gradle Wrapper & Make Executable
         if: steps.check_tag.outputs.exists == 'false'
-        run: chmod +x ./gradlew
+        run: |
+          wget -qO gradle/wrapper/gradle-wrapper.jar https://raw.githubusercontent.com/gradle/gradle/master/gradle/wrapper/gradle-wrapper.jar
+          chmod +x ./gradlew
 
       - name: Build Debug APK
         if: steps.check_tag.outputs.exists == 'false'
