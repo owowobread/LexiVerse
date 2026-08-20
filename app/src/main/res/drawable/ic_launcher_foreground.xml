@@ -1,0 +1,38 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- LexiVerse open book and cosmic knowledge crest -->
+    <!-- Left page -->
+    <path
+        android:fillColor="#E0E7FF"
+        android:pathData="M54,34 C44,30 32,32 26,35 C24.5,35.8 24,37.3 24,39 L24,73 C24,74.5 25.5,75.7 27,75 C33,72 43,71 54,76 Z" />
+    <!-- Right page -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M54,34 C64,30 76,32 82,35 C83.5,35.8 84,37.3 84,39 L84,73 C84,74.5 82.5,75.7 81,75 C75,72 65,71 54,76 Z" />
+    <!-- Book Spine Glow -->
+    <path
+        android:fillColor="#6366F1"
+        android:pathData="M52.5,33 L55.5,33 L55.5,77 L52.5,77 Z" />
+    <!-- Book lines on left -->
+    <path
+        android:strokeColor="#A5B4FC"
+        android:strokeWidth="1.5"
+        android:strokeLineCap="round"
+        android:pathData="M31,44 C37,42 43,43 47,45 M31,52 C37,50 43,51 47,53 M31,60 C37,58 43,59 47,61" />
+    <!-- Book lines on right -->
+    <path
+        android:strokeColor="#818CF8"
+        android:strokeWidth="1.5"
+        android:strokeLineCap="round"
+        android:pathData="M61,45 C65,43 71,42 77,44 M61,53 C65,51 71,50 77,52 M61,61 C65,59 71,58 77,60" />
+    <!-- Sparkle / Star of intelligence at top -->
+    <path
+        android:fillColor="#FCD34D"
+        android:pathData="M54,18 L56,24 L62,26 L56,28 L54,34 L52,28 L46,26 L52,24 Z" />
+    <path
+        android:fillColor="#FBBF24"
+        android:pathData="M75,22 L76,25 L79,26 L76,27 L75,30 L74,27 L71,26 L74,25 Z" />
+</vector>
