@@ -48,6 +48,14 @@ jobs:
           wget -qO gradle/wrapper/gradle-wrapper.jar https://raw.githubusercontent.com/gradle/gradle/master/gradle/wrapper/gradle-wrapper.jar
           chmod +x ./gradlew
 
+      - name: Generate Debug Keystore (If Missing)
+        if: steps.check_tag.outputs.exists == 'false'
+        run: |
+          if [ ! -f "debug.keystore" ]; then
+            echo "debug.keystore not found, generating a new one for GitHub Actions..."
+            keytool -genkey -v -keystore debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "C=US, O=Android, CN=Android Debug"
+          fi
+
       - name: Build Debug APK
         if: steps.check_tag.outputs.exists == 'false'
         run: ./gradlew assembleDebug
