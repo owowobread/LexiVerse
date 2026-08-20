@@ -1,5 +1,14 @@
 package com.example.ui
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -31,6 +40,8 @@ import java.io.File
 import com.example.data.updater.DownloadState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -136,6 +147,21 @@ fun LexiVerseApp(
     
     val fontScale = fontScaleSetting.scale
 
+    // Nested scroll for bottom bar
+    var bottomBarVisible by remember { mutableStateOf(true) }
+    val nestedScrollConnection = remember {
+        object : NestedScrollConnection {
+            override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                if (available.y < -15f) {
+                    bottomBarVisible = false
+                } else if (available.y > 15f) {
+                    bottomBarVisible = true
+                }
+                return Offset.Zero
+            }
+        }
+    }
+
     // Optional silent update check on launch
     LaunchedEffect(settingsUiState.autoCheckUpdates) {
         if (settingsUiState.autoCheckUpdates) {
@@ -153,6 +179,7 @@ fun LexiVerseApp(
             color = MaterialTheme.colorScheme.background
         ) {
             Scaffold(
+                modifier = Modifier.nestedScroll(nestedScrollConnection),
                 topBar = {
                     TopAppBar(
                         title = {
@@ -169,7 +196,12 @@ fun LexiVerseApp(
                     )
                 },
                 bottomBar = {
-                    NavigationBar(
+                    AnimatedVisibility(
+                        visible = bottomBarVisible,
+                        enter = slideInVertically(initialOffsetY = { it }) + expandVertically(),
+                        exit = slideOutVertically(targetOffsetY = { it }) + shrinkVertically()
+                    ) {
+                        NavigationBar(
                         containerColor = MaterialTheme.colorScheme.surface,
                         tonalElevation = 6.dp
                     ) {
@@ -199,6 +231,7 @@ fun LexiVerseApp(
                                 modifier = Modifier.testTag(item.testTag)
                             )
                         }
+                    }
                     }
                 }
             ) { innerPadding ->
