@@ -41,16 +41,7 @@ abstract class LexiVerseDatabase : RoomDatabase() {
                     LexiVerseDatabase::class.java,
                     "lexiverse_database"
                 )
-                    .addCallback(object : Callback() {
-                        override fun onCreate(db: SupportSQLiteDatabase) {
-                            super.onCreate(db)
-                            // Prepopulate the database in background
-                            CoroutineScope(Dispatchers.IO).launch {
-                                val database = getInstance(context)
-                                database.offlineWordDao().insertAll(OfflineDictionaryData.initialWords)
-                            }
-                        }
-                    })
+                    .createFromAsset("lexiverse.db")
                     .build()
                 INSTANCE = instance
                 instance
