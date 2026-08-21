@@ -23,7 +23,8 @@ import kotlinx.coroutines.launch
 enum class DictionarySourceTab {
     VOCABULARY,
     URBAN,
-    OFFLINE
+    OFFLINE,
+    BOOKMARKS
 }
 
 data class DictionaryUiState(
@@ -47,6 +48,13 @@ class DictionaryViewModel(
 
     val recentSearches: StateFlow<List<SearchHistoryEntity>> =
         searchWordUseCase.getRecentSearches().stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
+
+    val bookmarks: StateFlow<List<com.example.data.local.entity.FavoriteWordEntity>> =
+        manageFavoritesUseCase.getFavorites().stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = emptyList()
@@ -162,6 +170,12 @@ class DictionaryViewModel(
                 errorMessage = null,
                 suggestions = emptyList()
             )
+        }
+    }
+
+    fun deleteFavorite(id: Long) {
+        viewModelScope.launch {
+            manageFavoritesUseCase.removeFavoriteById(id)
         }
     }
 

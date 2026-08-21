@@ -94,6 +94,7 @@ fun DictionarySearchScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val recentSearches by viewModel.recentSearches.collectAsState()
+    val bookmarks by viewModel.bookmarks.collectAsState()
     val ttsManager = rememberTtsManager()
     val focusManager = LocalFocusManager.current
 
@@ -213,8 +214,11 @@ fun DictionarySearchScreen(
                     result = uiState.activeWordResult!!,
                     selectedTab = uiState.selectedTab,
                     isFavorite = uiState.isFavorite,
+                    bookmarks = bookmarks,
                     onSelectTab = { viewModel.selectTab(it) },
                     onToggleFavorite = { viewModel.toggleFavorite() },
+                    onSelectBookmark = { viewModel.searchWord(it) },
+                    onDeleteBookmark = { viewModel.deleteFavorite(it) },
                     ttsManager = ttsManager
                 )
             }
@@ -239,8 +243,11 @@ fun ActiveWordResultView(
     result: UnifiedWordResult,
     selectedTab: DictionarySourceTab,
     isFavorite: Boolean,
+    bookmarks: List<com.example.data.local.entity.FavoriteWordEntity>,
     onSelectTab: (DictionarySourceTab) -> Unit,
     onToggleFavorite: () -> Unit,
+    onSelectBookmark: (String) -> Unit,
+    onDeleteBookmark: (Long) -> Unit,
     ttsManager: com.example.ui.components.TtsManager
 ) {
     val primaryDefinition = result.vocabularyResult?.primaryDefinition
@@ -248,7 +255,7 @@ fun ActiveWordResultView(
         ?: result.urbanDefinitions.firstOrNull()?.definition
         ?: "No definition"
 
-    val pagerState = rememberPagerState(pageCount = { 3 })
+    val pagerState = rememberPagerState(pageCount = { 4 })
     val coroutineScope = rememberCoroutineScope()
     
     // Sync external tab selection with pager
@@ -257,6 +264,7 @@ fun ActiveWordResultView(
             DictionarySourceTab.VOCABULARY -> 0
             DictionarySourceTab.URBAN -> 1
             DictionarySourceTab.OFFLINE -> 2
+            DictionarySourceTab.BOOKMARKS -> 3
         }
         if (pagerState.currentPage != targetPage) {
             pagerState.animateScrollToPage(targetPage)
@@ -268,7 +276,8 @@ fun ActiveWordResultView(
         val newTab = when(pagerState.currentPage) {
             0 -> DictionarySourceTab.VOCABULARY
             1 -> DictionarySourceTab.URBAN
-            else -> DictionarySourceTab.OFFLINE
+            2 -> DictionarySourceTab.OFFLINE
+            else -> DictionarySourceTab.BOOKMARKS
         }
         if (selectedTab != newTab) {
             onSelectTab(newTab)
@@ -364,6 +373,16 @@ fun ActiveWordResultView(
                     }
                 )
             }
+            item {
+                NaturalPillTab(
+                    title = "Bookmarks",
+                    isSelected = selectedTab == DictionarySourceTab.BOOKMARKS,
+                    onClick = { 
+                        onSelectTab(DictionarySourceTab.BOOKMARKS)
+                        coroutineScope.launch { pagerState.animateScrollToPage(3) }
+                    }
+                )
+            }
         }
 
         // Tab Content via HorizontalPager
@@ -421,6 +440,24 @@ fun ActiveWordResultView(
                                 EmptySourceNotice(
                                     sourceName = "Offline Dictionary",
                                     message = "'${result.queryWord}' is not yet in the offline database cache."
+                                )
+                            }
+                        }
+                    }
+                    3 -> {
+                        if (bookmarks.isEmpty()) {
+                            item {
+                                EmptySourceNotice(
+                                    sourceName = "Bookmarks",
+                                    message = "You haven't saved any words yet."
+                                )
+                            }
+                        } else {
+                            items(bookmarks) { bookmark ->
+                                com.example.ui.screens.FavoriteWordCard(
+                                    item = bookmark,
+                                    onClick = { onSelectBookmark(bookmark.word) },
+                                    onDelete = { onDeleteBookmark(bookmark.id) }
                                 )
                             }
                         }
