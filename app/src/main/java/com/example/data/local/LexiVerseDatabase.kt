@@ -39,7 +39,7 @@ abstract class LexiVerseDatabase : RoomDatabase() {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
                     LexiVerseDatabase::class.java,
-                    "lexiverse_database"
+                    "lexiverse_database_v2"
                 )
                     .createFromAsset("lexiverse.db")
                     .fallbackToDestructiveMigration()
