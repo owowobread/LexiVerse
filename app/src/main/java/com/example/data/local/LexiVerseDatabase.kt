@@ -21,7 +21,7 @@ import kotlinx.coroutines.launch
         SearchHistoryEntity::class,
         FavoriteWordEntity::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class LexiVerseDatabase : RoomDatabase() {
@@ -42,6 +42,7 @@ abstract class LexiVerseDatabase : RoomDatabase() {
                     "lexiverse_database"
                 )
                     .createFromAsset("lexiverse.db")
+                    .fallbackToDestructiveMigration()
                     .build()
                 INSTANCE = instance
                 instance
